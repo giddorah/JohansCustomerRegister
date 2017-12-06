@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using dayThreeRegister.Entities;
 using System.Reflection;
+using dayThreeRegister.Controllers;
 
 namespace dayThreeRegister.Models
 {
@@ -36,25 +37,50 @@ namespace dayThreeRegister.Models
             databaseContext.SaveChanges();
         }
 
-        public void UpdateCustomer(Customer editCustomer, string capitalizedPropertyName, string value, DatabaseContext databaseContext)
+        public string UpdateCustomer(Customer editCustomer, ValuesController controller, string capitalizedPropertyName, string value, DatabaseContext databaseContext)
         {
             editCustomer.DateEdited = DateTime.Now;
             Type type = editCustomer.GetType();
+            var checkModel = new EditCustomer();
             foreach (PropertyInfo property in type.GetProperties())
             {
                 if (property.Name.ToString().Equals(capitalizedPropertyName))
                 {
                     if (capitalizedPropertyName == "Age")
                     {
-                        property.SetValue(editCustomer, int.Parse(value));
+                        try
+                        {
+                            property.SetValue(editCustomer, int.Parse(value));
+                        }
+                        catch (Exception)
+                        {
+                            return $"Error: Age can't be empty";
+                        }
+                        
                     }
                     else
                     {
                         property.SetValue(editCustomer, value);
                     }
-                }
+                } 
             }
-            databaseContext.SaveChanges();
+
+            checkModel.FirstName = editCustomer.FirstName;
+            checkModel.LastName = editCustomer.LastName;
+            checkModel.Age = editCustomer.Age;
+            checkModel.Email = editCustomer.Email;
+            checkModel.Gender = editCustomer.Gender;
+
+            if (controller.TryValidateModel(checkModel))
+            {
+                databaseContext.SaveChanges();
+                return $"Updated customer {checkModel.FirstName} {checkModel.LastName} ";
+            }
+            else
+            {
+                var returnMessage = controller.TryValidateModel(checkModel).ToString();
+                return "Error: Model does not pass validation.";
+            }
         }
         public void UpdateAddress(Address editAddress, string capitalizedPropertyName, string value, DatabaseContext databaseContext)
         {

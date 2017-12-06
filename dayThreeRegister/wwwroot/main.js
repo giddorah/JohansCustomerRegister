@@ -9,7 +9,23 @@ $("#countCustomers").click(function () {
         method: 'GET'
     })
         .done(function (result) {
-            $('#status').text(result);
+            $("#status").html('<div class="alert alert-primary alert-dismissible fade show" role="alert">' + result + '<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></h2>');
+        });
+});
+
+$("#checkLog").click(function () {
+    $.ajax({
+        url: '/api/log/checklog',
+        method: 'GET'
+    })
+        .done(function (result) {
+            let concatinatedMessage = "";
+
+            $.each(result, function (index, item) {
+                concatinatedMessage += item + "<br/> ";
+            });
+
+            $("#status").html('<div class="alert alert-primary alert-dismissible fade show" role="alert">' + concatinatedMessage + '<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></h2>');
         });
 });
 
@@ -23,11 +39,12 @@ $("#getOne").click(function () {
         data: { id: idNumber, brief: showBrief }
     })
         .done(function (result) {
-            $("#status").text(result);
+            $("#status").html('<div class="alert alert-success alert-dismissible fade show" role="alert">' + result + '<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></h2>');
+
         })
 
         .fail(function (xhr, status, error) {
-            $("#status").text(xhr.responseText);
+            $("#status").html('<div class="alert alert-danger alert-dismissible fade show" role="alert">' + xhr.responseText + '<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></h2>');
         });
 });
 
@@ -43,13 +60,13 @@ $("#getAll").click(function () {
             $.each(result, function (index, item) {
                 generatedResult += '<tr id="customerNumber' + item.id + '">' +
                     '<th scope="row">' + item.id + '</th>' +
-                    '<td>' + '<a href="#" class="edit" data-name="firstName" data-type="text" data-pk="' + item.id + '" data-title="Enter First Name">' + item.firstName + '</a></td>' +
-                    '<td>' + '<a href="#" class="edit" data-name="lastName" data-type="text" data-pk="' + item.id + '" data-title="Enter Last Name">' + item.lastName + '</a></td>' +
-                    '<td>' + '<a href="#" class="edit" data-name="gender" data-type="text" data-pk="' + item.id + '" data-title="Enter Gender">' + item.gender + '</a></td>' +
-                    '<td>' + '<a href="#" class="edit" data-name="email" data-type="text" data-pk="' + item.id + '" data-title="Enter Email">' + item.email + '</a></td>' +
-                    '<td>' + '<a href="#" class="edit" data-name="age" data-type="text" data-pk="' + item.id + '" data-title="Enter Age">' + item.age + '</a></td>' +
-                    '<td>' + '<a href="#" class="address" id="' + item.id + '" data-title="Adress"><button class="btn btn-info">A</button></a></td>' +
-                    '<td>' + '<a href="#" class="delete" id="' + item.id + '" data-title="Delete"><button class="btn btn-danger">X</button></a></td>' +
+                    '<td>' + '<span class="edit" data-name="firstName" data-type="text" data-pk="' + item.id + '" data-title="Enter First Name">' + item.firstName + '</span></td>' +
+                    '<td>' + '<span class="edit" data-name="lastName" data-type="text" data-pk="' + item.id + '" data-title="Enter Last Name">' + item.lastName + '</span></td>' +
+                    '<td>' + '<span class="edit" data-name="gender" data-type="text" data-pk="' + item.id + '" data-title="Enter Gender">' + item.gender + '</span></td>' +
+                    '<td>' + '<span class="edit" data-name="email" data-type="text" data-pk="' + item.id + '" data-title="Enter Email">' + item.email + '</span></td>' +
+                    '<td>' + '<span class="edit" data-name="age" data-type="text" data-pk="' + item.id + '" data-title="Enter Age">' + item.age + '</span></td>' +
+                    '<td>' + '<span class="address" id="' + item.id + '" data-title="Adress"><button class="btn btn-info">A</button></span></td>' +
+                    '<td>' + '<span class="delete" id="' + item.id + '" data-title="Delete"><button class="btn btn-danger">X</button></span></td>' +
                     '</tr>';
             });
             generatedResult += "</tbody ></table ><hr />";
@@ -59,7 +76,15 @@ $("#getAll").click(function () {
             $(".edit").editable({
                 type: 'text',
                 url: '/api/values/editcustomer',
-                emptyMessage: '<em>Please write something.</em>'
+                emptyMessage: '<em>Please write something.</em>',
+                success: function (response) {
+                    $("#status").html('<div class="alert alert-success alert-dismissible fade show" role="alert">' + response + '<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></h2>');
+                    $().alert('close');
+                },
+                error: function (response) {
+                    $("#status").html('<div class="alert alert-danger alert-dismissible fade show" role="alert">' + response.responseText + '<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></h2>');
+                    $().alert('close');
+                }
             });
 
             $(".delete").click(function () {
@@ -68,8 +93,10 @@ $("#getAll").click(function () {
                     url: '/api/values/deleteacustomer',
                     method: 'POST',
                     data: { id: deleteIdNumber }
-                }).done(function () {
+                }).done(function (response) {
                     $("#getAll").click();
+                    $("#status").html('<div class="alert alert-warning alert-dismissible fade show" role="alert">' + response + '<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></h2>');
+
                 });
             });
             $(".address").click(function () {
@@ -87,10 +114,10 @@ $("#getAll").click(function () {
                     else {
                         $.each(result, function (index, item) {
                             tableContents += '<tr><th scope="row">#' + item.id
-                                + '</th><td><a href="#" class="editAddress" data-name="streetName" data-type="text" data-pk="' + item.id + '" data-title="Enter Street Name">' + item.streetName + '</a></td>'
-                                + '</th><td><a href="#" class="editAddress" data-name="number" data-type="text" data-pk="' + item.id + '" data-title="Enter Street Number">' + item.number + '</a></td>'
-                                + '</th><td><a href="#" class="editAddress" data-name="postalCode" data-type="text" data-pk="' + item.id + '" data-title="Enter Postal Code">' + item.postalCode + '</a></td>'
-                                + '</th><td><a href="#" class="editAddress" data-name="area" data-type="text" data-pk="' + item.id + '" data-title="Enter Area Name">' + item.area + '</a></td>'
+                                + '</th><td><span href="#" class="editAddress" data-name="streetName" data-type="text" data-pk="' + item.id + '" data-title="Enter Street Name">' + item.streetName + '</span></td>'
+                                + '</th><td><span href="#" class="editAddress" data-name="number" data-type="text" data-pk="' + item.id + '" data-title="Enter Street Number">' + item.number + '</span></td>'
+                                + '</th><td><span href="#" class="editAddress" data-name="postalCode" data-type="text" data-pk="' + item.id + '" data-title="Enter Postal Code">' + item.postalCode + '</span></td>'
+                                + '</th><td><span href="#" class="editAddress" data-name="area" data-type="text" data-pk="' + item.id + '" data-title="Enter Area Name">' + item.area + '</span></td>'
                                 + '</th><td class="delete" id=' + item.id + '><button class="btn btn-danger">X</button></td>'
                                 + '</td></tr>';
                         });
@@ -99,7 +126,7 @@ $("#getAll").click(function () {
                 }).fail(function () {
                     tableContents = "An error has occured during the process.";
                 }).always(function () {
-                    let modalContents = '<div class="modal-dialog" role="document">'
+                    let modalContents = '<div class="modal-dialog modal-lg" role="document">'
                         + '<div class="modal-content">'
                         + '<div class="modal-header">'
                         + '<h5 class="modal-title" id="exampleModalLabel">Known Addresses</h5>'
@@ -111,8 +138,8 @@ $("#getAll").click(function () {
                         + '<table class="table">'
                         + '<tbody>';
                     modalContents += tableContents;
-                    modalContents += '</tbody></table><button class="btn btn-secondary text-center" id="addAnotherAddress">Add Address</button><div id="editArea"></div></div><div class="modal-footer">'
-                        + '<span id="addressStatus"></span><button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>'
+                    modalContents += '<span id="addressStatus"></span></tbody></table><button class="btn btn-secondary text-center" id="addAnotherAddress">Add Address</button><div id="editArea"></div></div><div class="modal-footer">'
+                        + '<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>'
                         + '</div>'
                         + '</div>'
                         + '</div>';
@@ -127,7 +154,9 @@ $("#getAll").click(function () {
                             data: { addressId: idforbutton, custId: idforcustomer }
                         })
                             .done(function (result) {
-                                $("#addressStatus").html("<strong style='color:red'>" + result + "</strong>");
+                                $("#addressStatus").html('<div class="alert alert-danger alert-dismissible fade show" role="alert">' + result + '<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></h2>');
+
+                                
                             });
                     });
 
@@ -147,18 +176,20 @@ $("#getAll").click(function () {
                                 data: { StreetName: cStreetName, Number: cNumber, PostalCode: cPostalCode, Area: cArea, custId: idforcustomer }
                             })
                                 .done(function (result) {
+                                    $("#addressStatus").html('<div class="alert alert-success alert-dismissible fade show" role="alert">' + result + '<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></h2>');
 
-                                    $("#addressStatus").html("<strong style='color:green'>" + result + "</strong>");
+                                    
                                 })
                                 .fail(function (xhr, status, error) {
                                     let errorMessages = xhr.responseJSON;
                                     let concatinatedErrorMessages = "";
                                     $.each(errorMessages, function (index, item) {
-                                        
+
                                         concatinatedErrorMessages += item[0] + " ";
                                     });
+                                    $("#addressStatus").html('<div class="alert alert-danger alert-dismissible fade show" role="alert">' + concatinatedErrorMessages + '<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></h2>');
 
-                                    $("#addressStatus").html("<strong style='color:red'>" + concatinatedErrorMessages + "</strong>");
+                                    
                                 });
 
                         });
@@ -167,13 +198,11 @@ $("#getAll").click(function () {
                     $(".editAddress").editable({
                         type: 'text',
                         url: '/api/values/editaddress',
-                        success: function (response, newValue) {
-                            if (response.status === 'error') {
-                                console.log(response);
-                            }
-                            else {
-                                console.log(response);
-                            }
+                        success: function (response) {
+                            $("#addressStatus").html('<div class="alert alert-success alert-dismissible fade show" role="alert">' + response + '<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></h2>');
+                        },
+                        fail: function (response) {
+                            $("#addressStatus").html('<div class="alert alert-danger alert-dismissible fade show" role="alert">' + response + '<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></h2>');
                         }
                     });
 
@@ -201,7 +230,8 @@ $("#createNew").click(function () {
         data: { FirstName: cfirstName, LastName: clastName, Gender: cgender, Email: cemail, Age: cage }
     })
         .done(function (result) {
-            $("#status").text(result);
+            $("#status").html('<div class="alert alert-success alert-dismissible fade show" role="alert">' + result + '<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></h2>');
+
             $("#getAll").click();
         })
 
@@ -212,8 +242,8 @@ $("#createNew").click(function () {
             $.each(errorMessages, function (index, item) {
                 concatinatedErrorMessages += item[0] + " ";
             });
+            $("#status").html('<div class="alert alert-warning alert-dismissible fade show" role="alert">' + concatinatedErrorMessages + '<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></h2>');
 
-            $("#status").text(concatinatedErrorMessages);
         });
 });
 
@@ -224,11 +254,12 @@ $("#seedCustomers").click(function () {
         method: 'GET'
     })
         .done(function (result) {
-            $("#status").text(result);
+            $("#status").html('<div class="alert alert-success alert-dismissible fade show" role="alert">' + result + '<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></h2>');
+
             $("#getAll").click();
         })
 
         .fail(function (xhr, status, error) {
-            $("#status").text(xhr.responseText);
+            $("#status").html('<div class="alert alert-warning alert-dismissible fade show" role="alert">' + xhr.responseText + '<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></h2>'); 
         });
 });

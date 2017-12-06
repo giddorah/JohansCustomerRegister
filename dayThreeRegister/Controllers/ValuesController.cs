@@ -8,60 +8,23 @@ using System.Globalization;
 using System.Reflection;
 using dayThreeRegister.Entities;
 using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Microsoft.Extensions.Logging;
 
 namespace dayThreeRegister.Controllers
 {
-    public class CustomGenderAttribute : ValidationAttribute
-    {
-        public CustomGenderAttribute()
-        {
-            this.ErrorMessage = "Accepted values for gender is: Male or Female.";
-        }
-
-        public override bool IsValid(object value)
-        {
-            string gender = value as string;
-
-            if (gender.ToLower() == "male" || gender.ToLower() == "female")
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
-        }    
-    }
-
-    public class CustomNameAttribute : ValidationAttribute
-    {
-        public CustomNameAttribute()
-        {
-            this.ErrorMessage = "Accepted values for name is: A-Ö.";
-        }
-
-        public override bool IsValid(object value)
-        {
-            string name = value as string;
-
-            bool result = name.Any(x => !char.IsLetter(x));
-
-            return result;
-        }
-    }
-
-
-
     [Route("api/values")]
     public class ValuesController : Controller
     {
         private DatabaseContext databaseContext;
-        private CustomerRepository cr;
+        private CustomerRepository customerRepository;
+        private readonly ILogger<ValuesController> _eventLogger;
 
-        public ValuesController(DatabaseContext databaseContext)
+        public ValuesController(DatabaseContext databaseContext, ILogger<ValuesController> logger)
         {
             this.databaseContext = databaseContext;
-            cr = new CustomerRepository();
+            customerRepository = new CustomerRepository();
+            _eventLogger = logger;
         }
 
 
@@ -69,7 +32,7 @@ namespace dayThreeRegister.Controllers
         [HttpGet, Route("getUsingId")]
         public IActionResult GetUsingId(int id, bool brief)
         {
-            var result = cr.GetCustomerById(id, databaseContext);
+            var result = customerRepository.GetCustomerById(id, databaseContext);
             var returnMessage = "";
             if (result != null)
             {
@@ -92,6 +55,7 @@ namespace dayThreeRegister.Controllers
         [HttpGet, Route("getallcustomers")]
         public List<Customer> GetAllCustomers()
         {
+            _eventLogger.LogInformation("Command: Get all customers");
             databaseContext.Database.EnsureCreated();
             var listOfCUstomers = GetCustomerList();
 
@@ -156,10 +120,11 @@ namespace dayThreeRegister.Controllers
 
                     var customerToAdd = new Customer { FirstName = CapitalizeFirstLetterAccordingToWritingRules(newCustomer.FirstName), LastName = CapitalizeFirstLetterAccordingToWritingRules(newCustomer.LastName), Gender = CapitalizeFirstLetterAccordingToWritingRules(newCustomer.Gender), Email = newCustomer.Email, Age = newCustomer.Age, DateCreated = DateTime.Now };
 
-                    cr.AddCustomer(customerToAdd, databaseContext);
+                    customerRepository.AddCustomer(customerToAdd, databaseContext);
                     //databaseContext.Add(customerToAdd);
                     //databaseContext.SaveChanges();
                     //SaveList(customerToAdd);
+                    _eventLogger.LogInformation("Command: Created a new customer");
 
                     return Ok($"Added {customerToAdd.FirstName} {customerToAdd.LastName}.");
                 }
@@ -177,7 +142,7 @@ namespace dayThreeRegister.Controllers
             {
                 var addressToAdd = new Address { StreetName = newAddress.StreetName, Number = newAddress.Number, PostalCode = newAddress.PostalCode, Area = newAddress.Area };
 
-                cr.AddAddress(addressToAdd, int.Parse(custId), databaseContext);
+                customerRepository.AddAddress(addressToAdd, int.Parse(custId), databaseContext);
                 //databaseContext.Add(customerToAdd);
                 //databaseContext.SaveChanges();
                 //SaveList(customerToAdd);
@@ -202,15 +167,14 @@ namespace dayThreeRegister.Controllers
         {
             int selectedId = int.Parse(pk);
             var returnMessage = "";
-            bool somethingFails = false;
             string capitalizedPropertyName = CapitalizeFirstLetterWithoutTouchingTheRest(name);
 
-            foreach (var customerToEdit in cr.GetAllCustomers(databaseContext).Where(c => c.Id == selectedId ))
+            foreach (var customerToEdit in customerRepository.GetAllCustomers(databaseContext).Where(c => c.Id == selectedId ))
             {
-                cr.UpdateCustomer(customerToEdit, capitalizedPropertyName, value, databaseContext);
-                returnMessage = $"Updated {capitalizedPropertyName} to {value}.";
+                var message = customerRepository.UpdateCustomer(customerToEdit, this, capitalizedPropertyName, value, databaseContext);
+                returnMessage = message;
             }
-            if (somethingFails == false)
+            if (returnMessage.Contains("Error"))
             {
                 
                 //string dataLocation = "C:/Users/jspan/Documents/visual studio 2017/Projects/dayThreeRegister/dayThreeRegister/wwwroot/data.txt";
@@ -219,19 +183,33 @@ namespace dayThreeRegister.Controllers
                 //{
                 //    SaveList(customer);
                 //}
-                return Ok(returnMessage);
+                return BadRequest(returnMessage);
             }
             else
             {
-                return BadRequest("I have failed you.");
+                return Ok(returnMessage);
+            }
+        }
+
+        public ModelStateDictionary CheckIfEditedChangesAreValid(EditCustomer customerToEdit)
+        {
+            TryValidateModel(customerToEdit);
+
+            if (ModelState.IsValid)
+            {
+                return ModelState;
+            }
+            else
+            {
+                return ModelState;
             }
         }
 
         [HttpPost, Route("deleteacustomer")]
         public IActionResult DeleteACustomer(int id)
         {
-            var customerToRemove = cr.GetCustomerById(id, databaseContext);
-            cr.RemoveCustomer(customerToRemove, databaseContext);
+            var customerToRemove = customerRepository.GetCustomerById(id, databaseContext);
+            customerRepository.RemoveCustomer(customerToRemove, databaseContext);
 
             return Ok("Customer removed");
         }
@@ -239,7 +217,7 @@ namespace dayThreeRegister.Controllers
         [HttpPost, Route("deleteaddress")]
         public IActionResult DeleteAddress(string addressId, string custId)
         {
-            cr.RemoveCustomer(int.Parse(addressId), int.Parse(custId), databaseContext);
+            customerRepository.RemoveCustomer(int.Parse(addressId), int.Parse(custId), databaseContext);
 
             return Ok($"Address removed");
         }
@@ -260,7 +238,7 @@ namespace dayThreeRegister.Controllers
             var directory = System.IO.Path.GetDirectoryName(location);
             string dataLocation = directory + "/data.txt";
             
-            cr.SeedCustomers(dataLocation, databaseContext);
+            customerRepository.SeedCustomers(dataLocation, databaseContext);
 
             return Ok("Removed and re-seeded the database.");
         }
@@ -280,7 +258,7 @@ namespace dayThreeRegister.Controllers
 
             foreach (var addressToEdit in databaseContext.GetAllAddresses().Where(address => address.Id == addressId))
             {
-                cr.UpdateAddress(addressToEdit, capitalizedPropertyName, value, databaseContext);
+                customerRepository.UpdateAddress(addressToEdit, capitalizedPropertyName, value, databaseContext);
                 returnMessage = $"Updated {capitalizedPropertyName} to {value}.";
             }
 

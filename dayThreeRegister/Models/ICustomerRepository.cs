@@ -1,4 +1,5 @@
-﻿using dayThreeRegister.Entities;
+﻿using dayThreeRegister.Controllers;
+using dayThreeRegister.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,7 +13,7 @@ namespace dayThreeRegister.Models
         Customer GetCustomerById(int id, DatabaseContext databaseContext);
         void AddCustomer(Customer newCustomer, DatabaseContext databaseContext);
         void RemoveCustomer(Customer removeCustomer, DatabaseContext databaseContext);
-        void UpdateCustomer(Customer editCustomer, string capitalizedPropertyName, string value, DatabaseContext databaseContext);
+        string UpdateCustomer(Customer editCustomer, ValuesController controller, string capitalizedPropertyName, string value, DatabaseContext databaseContext);
         void SeedCustomers(string dataLocation, DatabaseContext databaseContext);
     }
 }

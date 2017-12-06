@@ -1,4 +1,4 @@
-﻿using dayThreeRegister.Controllers;
+﻿using dayThreeRegister.Entities;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;

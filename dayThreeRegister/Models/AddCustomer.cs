@@ -1,4 +1,4 @@
-﻿using dayThreeRegister.Controllers;
+﻿using dayThreeRegister.Entities;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -23,7 +23,7 @@ namespace dayThreeRegister.Models
         public string LastName { get; set; }
 
         [Required(ErrorMessage = "An Email is required.")]
-        [EmailAddress(ErrorMessage = "Not a valid email-address")]
+        [EmailAddress(ErrorMessage = "Not a valid email-address.")]
         public string Email { get; set; }
 
         [Required(ErrorMessage = "A gender is required.")]
