@@ -19,7 +19,6 @@ namespace dayThreeRegister.Controllers
             var directory = System.IO.Path.GetDirectoryName(location);
             string dataLocation = directory + "/log/nlog-own.log";
 
-            //var currentDirectory = AppDomain.CurrentDomain.BaseDirectory;
             var log = System.IO.File.ReadAllLines(dataLocation);
             return log;
         }
