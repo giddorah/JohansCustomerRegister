@@ -20,11 +20,11 @@ namespace dayThreeRegister.Controllers
         private CustomerRepository customerRepository;
         private readonly ILogger<ValuesController> _eventLogger;
 
-        public ValuesController(DatabaseContext databaseContext, ILogger<ValuesController> logger)
+        public ValuesController(DatabaseContext databaseContext, ILogger<ValuesController> eventLogger)
         {
             this.databaseContext = databaseContext;
             customerRepository = new CustomerRepository();
-            _eventLogger = logger;
+            _eventLogger = eventLogger;
         }
 
 
