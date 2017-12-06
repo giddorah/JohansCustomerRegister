@@ -103,6 +103,7 @@ namespace dayThreeRegister.Controllers
         {
             if (!ModelState.IsValid)
             {
+                _eventLogger.LogInformation("Failed: Failed to add customer");
                 return BadRequest(ModelState);
             }
             else
@@ -111,6 +112,7 @@ namespace dayThreeRegister.Controllers
 
                 if (concatinatedForValidation.Contains(","))
                 {
+                    _eventLogger.LogInformation("Failed: Failed to add customer due to illegal character");
                     return BadRequest($"Your data contains an illegal character (,)");
                 }
                 else
@@ -136,6 +138,7 @@ namespace dayThreeRegister.Controllers
         {
             if (!ModelState.IsValid)
             {
+                _eventLogger.LogInformation("Failed: Failed to add address");
                 return BadRequest(ModelState);
             }
             else
@@ -146,7 +149,7 @@ namespace dayThreeRegister.Controllers
                 //databaseContext.Add(customerToAdd);
                 //databaseContext.SaveChanges();
                 //SaveList(customerToAdd);
-
+                _eventLogger.LogInformation("Command: Added address");
                 return Ok($"Added {addressToAdd.StreetName} {addressToAdd.Number}.");
             }
         }
@@ -176,17 +179,19 @@ namespace dayThreeRegister.Controllers
             }
             if (returnMessage.Contains("Error"))
             {
-                
+
                 //string dataLocation = "C:/Users/jspan/Documents/visual studio 2017/Projects/dayThreeRegister/dayThreeRegister/wwwroot/data.txt";
                 //System.IO.File.WriteAllBytes(dataLocation, new byte[0]);
                 //foreach (var customer in listOfCustomers)
                 //{
                 //    SaveList(customer);
                 //}
+                _eventLogger.LogInformation("Failed: Failed to edit customer");
                 return BadRequest(returnMessage);
             }
             else
             {
+                _eventLogger.LogInformation("Command: Edited customer");
                 return Ok(returnMessage);
             }
         }
@@ -210,7 +215,7 @@ namespace dayThreeRegister.Controllers
         {
             var customerToRemove = customerRepository.GetCustomerById(id, databaseContext);
             customerRepository.RemoveCustomer(customerToRemove, databaseContext);
-
+            _eventLogger.LogInformation("Command: Deleted customer");
             return Ok("Customer removed");
         }
 
@@ -218,7 +223,7 @@ namespace dayThreeRegister.Controllers
         public IActionResult DeleteAddress(string addressId, string custId)
         {
             customerRepository.RemoveCustomer(int.Parse(addressId), int.Parse(custId), databaseContext);
-
+            _eventLogger.LogInformation("Command: Deleted address");
             return Ok($"Address removed");
         }
 
@@ -227,7 +232,7 @@ namespace dayThreeRegister.Controllers
         {
             var customers = databaseContext.GetAllCustomers();
             var amountOfCustomers = customers.Count();
-
+            _eventLogger.LogInformation("Command: Counted customers");
             return Ok($"Amount of customers is: {amountOfCustomers}");
         }
 
@@ -239,13 +244,14 @@ namespace dayThreeRegister.Controllers
             string dataLocation = directory + "/data.txt";
             
             customerRepository.SeedCustomers(dataLocation, databaseContext);
-
+            _eventLogger.LogInformation("Command: Re-seeded the database");
             return Ok("Removed and re-seeded the database.");
         }
 
         [HttpGet, Route("showcustomeradresses")]
         public List<Address> ShowCustomerAdresses(int id)
         {
+            _eventLogger.LogInformation("Command: Caught addresses of a customer");
             return databaseContext.GetAllAddressesRelatedToACustomer(id);
         }
 
@@ -262,6 +268,7 @@ namespace dayThreeRegister.Controllers
                 returnMessage = $"Updated {capitalizedPropertyName} to {value}.";
             }
 
+            _eventLogger.LogInformation("Command: Edited an address");
             return Ok(returnMessage);
         }
     }
