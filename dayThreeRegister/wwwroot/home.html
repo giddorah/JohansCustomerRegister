@@ -1,0 +1,60 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title></title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css" integrity="sha384-PsH8R72JQ3SOdhVi3uxftmaW6Vc51MKb0q5P2rRUpPvrszuE4W1povHYgTpBfshb" crossorigin="anonymous">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/x-editable/1.5.0/bootstrap3-editable/css/bootstrap-editable.css" rel="stylesheet" />
+
+
+</head>
+<body>
+    <div class="container">
+        <!--<h1>Forms</h1>
+        <form action="/api/values/getusingid" method="get">
+            <div class="form-group">
+                <label for="idNumber">Enter an Id</label>
+                <input type="number" class="form-control" name="id" id="idNumber" /><br />
+                <label class="form-check-label">
+                    <input class="form-check-input" type="checkbox" value="true" name="brief" id="summary"> Show summary
+                </label>
+            </div>
+            <input type="submit" class="btn btn-success" style="width:200px" />
+        </form>
+
+        <form action="/api/values/getallcustomers" method="get">
+            <input type="submit" class="btn btn-success" value="Show all customers" style="width:200px" />
+        </form><br />
+
+        <hr />-->
+        <h1>Jquery/AJAX</h1>
+        <button id="getOne" class="btn btn-success" style="width:200px">Get by Id</button><br />
+        <button id="getAll" class="btn btn-success" style="width:200px">Get All</button>
+        <br />
+        <hr />
+
+        <input id="cfirstName" placeholder="First name" /><br />
+        <input id="clastName" placeholder="Last name" /><br />
+        <input id="cgender" placeholder="Gender" /><br />
+        <input id="cemail" placeholder="Email" /><br />
+        <input id="cage" placeholder="Age" /><br />
+        <br />
+        <button id="createNew" class="btn btn-success" style="width:200px">Create new</button>
+        <button id="countCustomers" class="btn btn-alert">Count Customers</button>
+        <button id="seedCustomers" class="btn btn-warning">Seed Customers</button>
+
+        <br />
+        <hr />
+        <span id="status"></span>
+
+        <div id="dataTable"></div>
+    </div>
+    <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true"></div>
+
+        <script src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-3.2.1.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js" integrity="sha384-vFJXuSJphROIrBnz7yo7oB41mKfc8JzQZiCq4NCceLEaO4IHwicKwpJf9c9IpFgh" crossorigin="anonymous"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js" integrity="sha384-alpBpkh1PFOepccYVYDB4do5UnbKysX5WZXm3XxPqe5iKTfUKjNkCk9SaVuEZflJ" crossorigin="anonymous"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/x-editable/1.5.0/bootstrap3-editable/js/bootstrap-editable.min.js"></script>
+        <script src="main.js"></script>
+</body>
+</html>
