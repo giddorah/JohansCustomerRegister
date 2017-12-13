@@ -55,7 +55,7 @@ $("#getAll").click(function () {
     })
         .done(function (result) {
 
-            let generatedResult = '<table class="table table-dark table-striped"><thead><tr><th scope="col">#</th><th scope="col">First Name</th><th scope="col">Last Name</th><th scope="col">Gender</th><th scope="col">Email</th><th scope="col">Age</th><th scope="col">Address</th><th scope="col">Delete</th></tr></thead><tbody>';
+            let generatedResult = '<table class="table table-dark table-striped"><thead><tr><th scope="col">#</th><th scope="col">First Name</th><th scope="col">Last Name</th><th scope="col">Gender</th><th scope="col">Email</th><th scope="col">Age</th><th scope="col">Created</th><th scope="col">Edited</th><th scope="col">Address</th><th scope="col">Delete</th></tr></thead><tbody>';
 
             $.each(result, function (index, item) {
                 generatedResult += '<tr id="customerNumber' + item.id + '">' +
@@ -65,6 +65,8 @@ $("#getAll").click(function () {
                     '<td>' + '<span class="edit" data-name="gender" data-type="text" data-pk="' + item.id + '" data-title="Enter Gender">' + item.gender + '</span></td>' +
                     '<td>' + '<span class="edit" data-name="email" data-type="text" data-pk="' + item.id + '" data-title="Enter Email">' + item.email + '</span></td>' +
                     '<td>' + '<span class="edit" data-name="age" data-type="text" data-pk="' + item.id + '" data-title="Enter Age">' + item.age + '</span></td>' +
+                    '<td>' + '<span data-name="DateCreated" data-type="text" data-pk="' + item.id + '">' + item.dateCreated + '</span></td>' +
+                    '<td>' + '<span data-name="DateEdited" data-type="text" data-pk="' + item.id + '">' + item.dateEdited + '</span></td>' +
                     '<td>' + '<span class="address" id="' + item.id + '" data-title="Adress"><button class="btn btn-info">A</button></span></td>' +
                     '<td>' + '<span class="delete" id="' + item.id + '" data-title="Delete"><button class="btn btn-danger">X</button></span></td>' +
                     '</tr>';
