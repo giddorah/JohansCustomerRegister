@@ -10,6 +10,7 @@ using dayThreeRegister.Entities;
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.Extensions.Logging;
+using Microsoft.AspNetCore.Hosting;
 
 namespace dayThreeRegister.Controllers
 {
@@ -19,16 +20,31 @@ namespace dayThreeRegister.Controllers
         private DatabaseContext databaseContext;
         private CustomerRepository customerRepository;
         private readonly ILogger<ValuesController> _eventLogger;
+        private readonly IHostingEnvironment env;
+        private readonly MailConfiguration mailConfiguration;
 
-        public ValuesController(DatabaseContext databaseContext, ILogger<ValuesController> eventLogger)
+        public ValuesController(DatabaseContext databaseContext, ILogger<ValuesController> eventLogger, IHostingEnvironment env, MailConfiguration mailConfiguration)
         {
             this.databaseContext = databaseContext;
             customerRepository = new CustomerRepository();
             _eventLogger = eventLogger;
+            this.env = env;
+            this.mailConfiguration = mailConfiguration;
+        }
+        [HttpGet, Route("env")]
+        public IActionResult Env()
+        {
+            return Ok( new object[] {
+                env.IsDevelopment(),
+                env.IsProduction(),
+                env.ContentRootPath,
+                env.ApplicationName,
+                env.EnvironmentName,
+                env.WebRootPath,
+                mailConfiguration
+            });
         }
 
-
-        // GET api/values
         [HttpGet, Route("getUsingId")]
         public IActionResult GetUsingId(int id, bool brief)
         {
@@ -64,39 +80,8 @@ namespace dayThreeRegister.Controllers
 
         public List<Customer> GetCustomerList()
         {
-            //string dataLocation = "C:/Users/jspan/Documents/visual studio 2017/Projects/dayThreeRegister/dayThreeRegister/wwwroot/data.txt";
-            //var dataSet = System.IO.File.ReadAllLines(dataLocation);
-
-            //var customers = new List<Customer2>();
-            //var databaseCustomers = new List<Customer>();
-
-
-
-            //foreach (var customer in dataSet)
-            //{
-            //    string[] splitString = customer.Split(",");
-            //    customers.Add(new Customer2
-            //    {
-            //        Id = int.Parse(splitString[0]),
-            //        FirstName = splitString[1],
-            //        LastName = splitString[2],
-            //        Gender = splitString[3],
-            //        Email = splitString[4],
-            //        Age = int.Parse(splitString[5])
-            //    });
-            //}
-
             return databaseContext.GetAllCustomers();
         }
-
-        //public void SaveList(Customer2 newCustomer)
-        //{
-        //    string dataLocation = "C:/Users/jspan/Documents/visual studio 2017/Projects/dayThreeRegister/dayThreeRegister/wwwroot/data.txt";
-
-        //    string newCustomerConvertedToString = newCustomer.Id.ToString() + "," + newCustomer.FirstName + "," + newCustomer.LastName + "," + newCustomer.Gender + "," + newCustomer.Email + "," + newCustomer.Age.ToString() + "\r\n";
-
-        //    System.IO.File.AppendAllText(dataLocation, newCustomerConvertedToString);
-        //}
 
         [HttpPost, Route("createcustomer")]
         public IActionResult CreateCustomer(AddCustomer newCustomer)
@@ -123,9 +108,7 @@ namespace dayThreeRegister.Controllers
                     var customerToAdd = new Customer { FirstName = CapitalizeFirstLetterAccordingToWritingRules(newCustomer.FirstName), LastName = CapitalizeFirstLetterAccordingToWritingRules(newCustomer.LastName), Gender = CapitalizeFirstLetterAccordingToWritingRules(newCustomer.Gender), Email = newCustomer.Email, Age = newCustomer.Age, DateCreated = DateTime.Now };
 
                     customerRepository.AddCustomer(customerToAdd, databaseContext);
-                    //databaseContext.Add(customerToAdd);
-                    //databaseContext.SaveChanges();
-                    //SaveList(customerToAdd);
+
                     _eventLogger.LogInformation("Command: Created a new customer");
 
                     return Ok($"Added {customerToAdd.FirstName} {customerToAdd.LastName}.");
@@ -146,9 +129,7 @@ namespace dayThreeRegister.Controllers
                 var addressToAdd = new Address { StreetName = newAddress.StreetName, Number = newAddress.Number, PostalCode = newAddress.PostalCode, Area = newAddress.Area };
 
                 customerRepository.AddAddress(addressToAdd, int.Parse(custId), databaseContext);
-                //databaseContext.Add(customerToAdd);
-                //databaseContext.SaveChanges();
-                //SaveList(customerToAdd);
+
                 _eventLogger.LogInformation("Command: Added address");
                 return Ok($"Added {addressToAdd.StreetName} {addressToAdd.Number}.");
             }
@@ -179,13 +160,6 @@ namespace dayThreeRegister.Controllers
             }
             if (returnMessage.Contains("Error"))
             {
-
-                //string dataLocation = "C:/Users/jspan/Documents/visual studio 2017/Projects/dayThreeRegister/dayThreeRegister/wwwroot/data.txt";
-                //System.IO.File.WriteAllBytes(dataLocation, new byte[0]);
-                //foreach (var customer in listOfCustomers)
-                //{
-                //    SaveList(customer);
-                //}
                 _eventLogger.LogInformation("Failed: Failed to edit customer");
                 return BadRequest(returnMessage);
             }
