@@ -19,4 +19,34 @@
     <DotNetCliToolReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Tools" Version="2.0.1" />
   </ItemGroup>
 
+  <ItemGroup>
+    <_CustomFiles Include="$(MSBuildProjectDirectory)/DataFilesLocal/**/*" />
+    <DotnetPublishFiles Include="@(_CustomFiles)">
+      <DestinationRelativePath>DataFiles/%(RecursiveDir)%(Filename)%(Extension)</DestinationRelativePath>
+    </DotnetPublishFiles>
+  </ItemGroup>
+
+  <ItemGroup>
+    <_CustomFiles Include="$(MSBuildProjectDirectory)/../Djur/**/*" />
+    <DotnetPublishFiles Include="@(_CustomFiles)">
+      <DestinationRelativePath>Animals/%(RecursiveDir)%(Filename)%(Extension)</DestinationRelativePath>
+    </DotnetPublishFiles>
+  </ItemGroup>
+  
+  <ItemGroup>
+    <MsDeploySkipRules Include="CustomSkipFile">
+      <ObjectName>filePath</ObjectName>
+      <AbsolutePath>wwwroot\\NotForPublish.html</AbsolutePath>
+    </MsDeploySkipRules>
+  </ItemGroup>
+  
+  <ItemGroup>
+    <Content Update="wwwroot/NotForPublish.html" CopyToPublishDirectory="Never" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <Folder Update="wwwroot\SecretHTML\**\*" CopyToPublishDirectory="Never" />
+    <Folder Include="wwwroot\NewFolder\" />
+  </ItemGroup>
+
 </Project>
